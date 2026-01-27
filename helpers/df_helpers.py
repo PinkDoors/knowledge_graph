@@ -56,6 +56,11 @@ def df2Graph(dataframe: pd.DataFrame, model=None) -> list:
     results = results.dropna()
     results = results.reset_index(drop=True)
 
+    if len(results) == 1:
+        return results[0]
+
+    print("here")
+    print(results)
     ## Flatten the list of lists to one single list of entities.
     concept_list = np.concatenate(results).ravel().tolist()
     return concept_list
