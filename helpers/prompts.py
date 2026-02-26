@@ -40,46 +40,34 @@ def graphPrompt(input: str, metadata={}, model="mistral-openorca:latest"):
     # print( chalk.blue(model_info))
 
     SYS_PROMPT = (
-        "You are a knowledge graph generator who extracts terms and their relations from a given context.You are provided with a context chunk (delimited by ```). "
-        "Your task is to extract a fully connected ontology of terms mentioned in the given context. "
-        "These terms should represent the key concepts as per the context.\n"
-        "GLOBAL CONSTRAINTS (MUST BE STRICTLY FOLLOWED):\n "
-        "- The knowledge graph MUST be fully connected.\n"
-        "- There MUST be exactly ONE root node representing the main concept of the context.\n"
-        "- Every other node MUST be directly or indirectly connected to the root node.\n"
-        "- Each node MUST have at least ONE relation to an already existing node.\n"
-        "- NO isolated nodes and NO isolated subgraphs are allowed.\n"
-        "- Do NOT generate standalone terms without relations.\n"
-        "- Every newly introduced node MUST be linked to at least one previously introduced node.\n"
-        "Thought 1: While traversing through each sentence, Think about the key terms mentioned in it.\n"
-            "\tTerms may include object, entity, location, organization, person, \n"
-            "\tcondition, acronym, documents, service, concept, etc.\n"
-            "\tTerms should be as atomistic as possible\n\n"
-        "Thought 2: Do NOT generate a separate list of terms. "
-        "Instead, think ONLY in terms of RELATIONS (triples). "
-        "Every concept MUST appear for the first time only as part of a relation.\n\n"
-        "Thought 3: For every new term, explicitly decide:\n "
-        "- Which existing term it must be connected to\n"
-        "- Why this connection is logically necessary\n"
-        "New terms that cannot be connected MUST NOT be generated.\n\n"
-        "Thought 4: Generate the knowledge graph so that a student can learn each concept sequentially. "
-        "Ensure that no concept refers to or depends on a concept that has NOT been introduced earlier. "
-        "Each next relation must extend the already connected graph.\n\n"
-        "Thought 5: Enforce global reachability: "
-        "From ANY node in the graph, it must be possible to reach ANY other node by following relations. "
-        "If at any moment a disconnected component is about to appear, you MUST instead connect it to the closest existing concept in the main graph.\n\n"
-        "OUTPUT FORMAT:\n"
-        "Format your output strictly as a JSON list of relations.Each element of the list contains exactly one pair of connected terms and their relation:\n"
-        "Example output (Don't include any other annotations, start with [ symbol immediately):\n"
-        "[\n"
-        "   {\n"
-        '       "node_1": "A concept from extracted ontology",\n'
-        '       "node_2": "A related concept from extracted ontology",\n'
-        '       "edge": "relationship between the two concepts, node_1 and node_2 in one or two sentences"\n'
-        "   }, \n"
-        "{ }, \n"
-        "]"
+        '''
+You are given a subject description. Your task is to generate a single linear step-by-step learning path for this subject.
+Subject description is delimited by ``` and provided to you.
+
+Rules:
+The learning path MUST be strictly linear.
+If two concepts are learnt simultaneously the order of them is not significant. 
+Do NOT branch, skip, or create parallel paths.
+Output only the sequence of relationships; no extra explanations.
+Each concept MUST be atomic. Do not use "()" and "," symbols. 
+
+OUTPUT FORMAT:
+Format your output strictly as a JSON list of ordered relationships. Each element represents one step in the learning path.
+Example output (Do not include any other annotations, start with [ symbol immediately):
+
+[
+{
+node_1: Earlier concept in the learning path,
+node_2: Next atomic concept derived from the context,
+edge: Explanation of how node_2 builds on node_1 for a learner
+},
+{ }
+]
+        '''
     )
+
+
+
 
     # client.BASE_URL = "http://host.docker.internal:11434"
     USER_PROMPT = f"context: ```{input}``` \n\n output: "
